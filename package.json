@@ -18,6 +18,11 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
+    "@langchain/community": "^0.3.45",
+    "@langchain/core": "^0.3.57",
+    "@langchain/langgraph": "^0.2.73",
+    "@langchain/openai": "^0.5.11",
+    "@payloadcms/db-sqlite": "3.48.0",
     "@payloadcms/next": "3.48.0",
     "@payloadcms/payload-cloud": "3.48.0",
     "@payloadcms/richtext-lexical": "3.48.0",
@@ -25,11 +30,12 @@
     "cross-env": "^7.0.3",
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
+    "langchain": "^0.3.30",
     "next": "15.3.2",
     "payload": "3.48.0",
     "react": "19.1.0",
     "sharp": "0.34.2",
-    "@payloadcms/db-sqlite": "3.48.0"
+    "zod": "^3.25.32"
   },
   "devDependencies": {
     "@playwright/test": "1.50.0",
