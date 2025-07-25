@@ -13,6 +13,14 @@ export const Employees: CollectionConfig = {
     update: () => true,
     delete: () => true,
   },
+  hooks: {
+    beforeChange: [
+      async ({ data, req }) => {
+        console.log(data, 'data beforeChange')
+        return data
+      },
+    ],
+  },
   /* hooks: {
     afterRead: [
       async ({ doc, req }) => {
@@ -81,9 +89,10 @@ export const Employees: CollectionConfig = {
       type: 'relationship',
       relationTo: 'technologies',
       filterOptions: ({ id }) => {
+        console.log(id, 'id filterOptions')
         return {
           id: {
-            not_in: [id],
+            not_in: id ? [id] : [],
           },
         }
       },
@@ -99,7 +108,7 @@ export const Employees: CollectionConfig = {
       filterOptions: ({ id }) => {
         return {
           id: {
-            not_in: [id],
+            not_in: id ? [id] : [],
           },
         }
       },

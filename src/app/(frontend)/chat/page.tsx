@@ -2,8 +2,8 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import MarkdownMessage from './MarkdownMessage'
-
-export default function ChatPage() {
+import { Hero1 } from '@/components/ui/hero-1'
+export default function Chat2Page() {
   const router = useRouter()
   const [messages, setMessages] = useState([
     {
@@ -22,6 +22,7 @@ export default function ChatPage() {
     setMessages((msgs) => [...msgs, userMessage])
     setInput('')
     setLoading(true)
+    console.log('input', input)
 
     // Llama al endpoint que retorna un stream
     const res = await fetch('/api/conversations/start', {
@@ -93,49 +94,8 @@ export default function ChatPage() {
   }
 
   return (
-    <div
-      style={{
-        maxWidth: 480,
-        margin: '40px auto',
-        border: '1px solid #ccc',
-        borderRadius: 8,
-        padding: 16,
-      }}
-    >
-      <div style={{ minHeight: 200, marginBottom: 16 }}>
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            style={{
-              textAlign: msg.role === 'user' ? 'right' : 'left',
-              margin: '8px 0',
-              lineHeight: 0,
-            }}
-          >
-            <span style={{ fontWeight: msg.role === 'assistant' ? 'bold' : 'normal' }}>
-              {msg.role === 'assistant' ? 'Agente IA: ' : 'Tú: '}
-            </span>
-            {msg.role === 'assistant' ? <MarkdownMessage content={msg.content} /> : msg.content}
-            <span style={{ fontSize: 10, color: '#888', marginLeft: 8 }}>
-              {msg.timestamp && new Date(msg.timestamp).toLocaleTimeString()}
-            </span>
-          </div>
-        ))}
-        {loading && <div style={{ color: '#888' }}>Agente IA está escribiendo...</div>}
-      </div>
-      <form onSubmit={handleSend} style={{ display: 'flex', gap: 8 }}>
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Escribe tu mensaje..."
-          style={{ flex: 1, padding: 8 }}
-          disabled={loading}
-        />
-        <button type="submit" disabled={loading || !input.trim()} style={{ padding: '0 16px' }}>
-          Enviar
-        </button>
-      </form>
-    </div>
+    <>
+      <Hero1 sendMessage={handleSend} input={input} setInput={setInput} loading={loading} />
+    </>
   )
 }

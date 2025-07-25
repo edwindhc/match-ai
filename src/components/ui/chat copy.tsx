@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { SendHorizonalIcon, Sparkles } from 'lucide-react'
 import Image from 'next/image'
-import MarkdownMessage from '../../app/(frontend)/chat2/MarkdownMessage'
+import MarkdownMessage from '../../app/(frontend)/chat/MarkdownMessage'
 
 interface Message {
   role: 'assistant' | 'user'

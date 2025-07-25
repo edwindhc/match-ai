@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { Bot, BotIcon, BotMessageSquare, Send, SendHorizonalIcon, Sparkles } from 'lucide-react'
 import Image from 'next/image'
-import MarkdownMessage from '../../app/(frontend)/chat2/MarkdownMessage'
+import MarkdownMessage from '../../app/(frontend)/chat/MarkdownMessage'
 import { Skeleton } from './skeleton'
 
 const Chat = ({
@@ -11,36 +11,46 @@ const Chat = ({
   sendMessage,
   input,
   setInput,
-  loading,
+  loadingInitial,
+  loadingSend,
 }: {
   messages: any[]
   sendMessage: (e: React.FormEvent) => Promise<void>
   input: string
   setInput: (input: string) => void
-  loading: boolean
+  loadingInitial: boolean
+  loadingSend: boolean
 }) => {
   const messagesEndRef = React.useRef<HTMLDivElement>(null)
+  const inputRef = React.useRef<HTMLInputElement>(null)
   React.useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // Focus input después de recibir respuesta
+  React.useEffect(() => {
+    if (!loadingSend && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [loadingSend])
 
   return (
     <div className="h-screen min-h-screen bg-[#0c0414] text-white flex flex-col relative overflow-x-hidden">
       {/* Gradient */}
       <div className="flex gap-[10rem] rotate-[-20deg] absolute top-[-40rem] right-[-30rem] z-[0] blur-[4rem] skew-[-40deg]  opacity-50">
-        <div className="w-[10rem] h-[20rem]  bg-linear-90 from-white to-blue-300"></div>
-        <div className="w-[10rem] h-[20rem]  bg-linear-90 from-white to-blue-300"></div>
-        <div className="w-[10rem] h-[20rem]  bg-linear-90 from-white to-blue-300"></div>
+        <div className="w-[10rem] h-[20rem] rounded-2xl animated-gradient"></div>
+        <div className="w-[10rem] h-[20rem] rounded-2xl animated-gradient"></div>
+        <div className="w-[10rem] h-[20rem] rounded-2xl animated-gradient"></div>
       </div>
       <div className="flex gap-[10rem] rotate-[-20deg] absolute top-[-50rem] right-[-50rem] z-[0] blur-[4rem] skew-[-40deg]  opacity-50">
-        <div className="w-[10rem] h-[20rem]  bg-linear-90 from-white to-blue-300"></div>
-        <div className="w-[10rem] h-[20rem]  bg-linear-90 from-white to-blue-300"></div>
-        <div className="w-[10rem] h-[20rem]  bg-linear-90 from-white to-blue-300"></div>
+        <div className="w-[10rem] h-[20rem] rounded-2xl animated-gradient"></div>
+        <div className="w-[10rem] h-[20rem] rounded-2xl animated-gradient"></div>
+        <div className="w-[10rem] h-[20rem] rounded-2xl animated-gradient"></div>
       </div>
       <div className="flex gap-[10rem] rotate-[-20deg] absolute top-[-60rem] right-[-60rem] z-[0] blur-[4rem] skew-[-40deg]  opacity-50">
-        <div className="w-[10rem] h-[30rem]  bg-linear-90 from-white to-blue-300"></div>
-        <div className="w-[10rem] h-[30rem]  bg-linear-90 from-white to-blue-300"></div>
-        <div className="w-[10rem] h-[30rem]  bg-linear-90 from-white to-blue-300"></div>
+        <div className="w-[10rem] h-[30rem] rounded-2xl animated-gradient"></div>
+        <div className="w-[10rem] h-[30rem] rounded-2xl animated-gradient"></div>
+        <div className="w-[10rem] h-[30rem] rounded-2xl animated-gradient"></div>
       </div>
       {/* Header */}
       <header className="flex justify-between items-center p-6">
@@ -109,7 +119,7 @@ const Chat = ({
               </div>
             </div>
           ))}
-          {loading && (
+          {loadingInitial && (
             <>
               {/* Skeleton MathAI */}
               <div className="flex items-start gap-3 mt-2">
@@ -138,6 +148,9 @@ const Chat = ({
               </div>
             </>
           )}
+          {loadingSend && !loadingInitial && (
+            <div className="text-purple-300 text-sm mt-2">MathAI está pensando...</div>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -148,16 +161,19 @@ const Chat = ({
             </button>
             <form className="flex items-center gap-2 justify-between w-full" onSubmit={sendMessage}>
               <input
+                ref={inputRef}
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Escribe un mensaje..."
+                disabled={loadingSend}
                 className="bg-transparent flex-1 outline-none text-gray-300 pl-4"
                 autoFocus
               />
               <button
                 type="submit"
                 className="p-2 cursor-pointer rounded-full hover:bg-[#2a1f3d] transition-all"
+                disabled={loadingSend}
               >
                 <SendHorizonalIcon className="w-5 h-5 text-[#17ABDA]" />
               </button>

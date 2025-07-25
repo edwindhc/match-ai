@@ -3,15 +3,18 @@
 import * as React from 'react'
 import { Send, SendHorizonalIcon, Sparkles } from 'lucide-react'
 import Image from 'next/image'
+import { Loader2 } from 'lucide-react'
 
 const Hero1 = ({
   sendMessage,
   input,
   setInput,
+  loading,
 }: {
   sendMessage: (e: React.FormEvent) => Promise<void>
   input: string
   setInput: (input: string) => void
+  loading: boolean
 }) => {
   return (
     <div className="min-h-screen bg-[#0c0414] text-white flex flex-col relative overflow-x-hidden">
@@ -87,34 +90,55 @@ const Hero1 = ({
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="¿Cómo puede ayudarte TalentMatch AI hoy?"
                   className="bg-transparent flex-1 outline-none text-gray-300 pl-4"
+                  disabled={loading}
                 />
                 <button
                   type="submit"
                   className="p-2 cursor-pointer rounded-full hover:bg-[#2a1f3d] transition-all"
+                  disabled={loading}
                 >
-                  <SendHorizonalIcon className="w-5 h-5 text-purple-400" />
+                  {loading ? (
+                    <Loader2 className="w-5 h-5 text-purple-400 animate-spin" />
+                  ) : (
+                    <SendHorizonalIcon className="w-5 h-5 text-purple-400" />
+                  )}
                 </button>
               </form>
             </div>
+            {loading && (
+              <div className="text-purple-300 text-sm mt-2 text-left">
+                TalentMatch AI está pensando...
+              </div>
+            )}
           </div>
 
           {/* Suggestion pills */}
           <div className="flex flex-wrap justify-center gap-2 mt-12 max-w-2xl mx-auto">
-            <button className="bg-[#1c1528] hover:bg-[#2a1f3d] rounded-full px-4 py-2 text-sm">
-              Buscar un desarrollador React disponible la próxima semana
-            </button>
-            <button className="bg-[#1c1528] hover:bg-[#2a1f3d] rounded-full px-4 py-2 text-sm">
-              Analizar brechas de talento internas
-            </button>
-            <button className="bg-[#1c1528] hover:bg-[#2a1f3d] rounded-full px-4 py-2 text-sm">
-              Sugerir candidatos con IA
-            </button>
-            <button className="bg-[#1c1528] hover:bg-[#2a1f3d] rounded-full px-4 py-2 text-sm">
-              Generar informe de staffing con LangChain
-            </button>
-            <button className="bg-[#1c1528] hover:bg-[#2a1f3d] rounded-full px-4 py-2 text-sm">
-              Encontrar talento usando filtros inteligentes
-            </button>
+            {[
+              'Buscar un desarrollador React disponible la próxima semana',
+              'Analizar brechas de talento internas',
+              'Sugerir candidatos con IA',
+              'Generar informe de staffing con LangChain',
+              'Encontrar talento usando filtros inteligentes',
+            ].map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                className="bg-[#1c1528] hover:bg-[#2a1f3d] rounded-full px-4 py-2 text-sm cursor-pointer"
+                onClick={() => {
+                  setInput(suggestion)
+                  setTimeout(() => {
+                    // Encuentra el form y dispara el submit
+                    const form = document.querySelector('form')
+                    if (form)
+                      form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
+                  }, 0)
+                }}
+                disabled={loading}
+              >
+                {suggestion}
+              </button>
+            ))}
           </div>
         </div>
       </main>

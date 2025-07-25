@@ -12,26 +12,22 @@ import {
 } from '@langchain/core/messages'
 import { StreamService } from '../services/StreamService'
 
-function processText(text: string) {
-  return text.replace(/\\n/g, '\n').replace(/\s+\n/g, '\n').trim()
-}
-
 function baseMessageToRoleContent(message: BaseMessage): {
   role: 'user' | 'system' | 'assistant' | 'tool'
   content: string
 } {
+  console.log(message, message.getType(), 'message')
   const types = {
     human: 'user',
     system: 'system',
     ai: 'assistant',
     tool: 'tool',
   } as const
-  console.log(message.getType(), 'message.getType()')
   const role = types[message.getType() as keyof typeof types]
 
   return {
     role,
-    content: processText(message.lc_kwargs.content ?? ''),
+    content: message.lc_kwargs.content,
   }
 }
 
@@ -52,37 +48,37 @@ export const startConversation = async (req: PayloadRequest) => {
     const memory = new ConversationMemory(openAIModel.getModel())
 
     const systemMessage = `Como TalentMatch AI, debes utilizar las siguientes herramientas para responder a las solicitudes relacionadas con la disponibilidad y habilidades de empleados:
-    1. find_skill_ids_by_name_and_return_current_time
-    Úsala para obtener los IDs de las skills por su nombre y devolver la fechay hora actual.
-    Si el usuario solicita skills específicas, utiliza esta tool para obtener los IDs antes de usar las otras tools.
-2. find_busy_employees
-Úsala para identificar empleados que están ocupados (tienen asignaciones activas) en una fecha específica.
-Si el usuario solicita saber quiénes NO están disponibles o quiénes están asignados en cierto periodo, utiliza esta tool.
-Puedes filtrar por skills si el usuario lo solicita.
-3. find_free_employees
-Úsala para encontrar empleados libres (sin asignaciones activas) en una fecha específica.
-Si el usuario pide empleados disponibles para un proyecto en una fecha, esta es la tool principal.
-Si el usuario especifica skills requeridas, pásalas como filtro; si no, busca todos los libres.
-3. find_next_available_employees
-Úsala cuando NO haya empleados libres en la fecha solicitada.
-Sirve para sugerir empleados que estarán disponibles próximamente, ordenados por la fecha más cercana de liberación.
-Si el usuario pregunta por "el próximo disponible" o "quién estará libre pronto", utiliza esta tool.
-También puedes filtrar por skills si es necesario.
-la fecha debe ser en formato ISO string, ejemplo: 2025-07-19T11:17:58.982Z
-🧠 COMPORTAMIENTO DEL AGENTE
-Antes de responder, reflexiona sobre cuál tool es la más adecuada según la petición del usuario.
-Si el usuario no especifica skills, busca todos los empleados que cumplan la condición de disponibilidad.
-Si ninguna tool retorna resultados (por ejemplo, no hay libres ni próximos a liberar), sugiere buscar perfiles externos o iniciar proceso de contratación.
-Siempre presenta los resultados de forma clara, profesional y orientada a negocios, incluyendo nombre, skills principales, años de experiencia y fecha de disponibilidad.
-Si la petición es ambigua, pide aclaraciones al usuario antes de ejecutar una tool.
-🛠️ EJEMPLOS DE USO DE TOOLS
-Petición: "¿Quién está disponible el 10 de junio con skills en Python?"
-Usa: find_free_employees con { date: '2024-06-10', skills: ['Python'] }
-Petición: "¿Quién estará libre más pronto con experiencia en React?"
-Usa: find_next_available_employees con { date: hoy, skills: ['React'] }
-Petición: "¿Quiénes están ocupados el 1 de julio?"
-Usa: find_busy_employees con { date: '2024-07-01' }
-Recuerda:
+
+Cuando muestres una lista (empleados, proyectos, asignaciones, tecnologías), usa este formato Markdown:
+
+Lista numerada (1., 2., 3., …) Obligatoriamente cada item debe estar enumerado
+y cada reistro o campo debe tener un salto de linea
+
+Una línea por campo, con el nombre en negrita
+
+Doble salto de línea entre cada ítem
+
+Escribe "No especificado" si falta un valor
+
+Ejemplo - Empleados:
+
+Nombre: John Doe
+Correo Electrónico: john.doe@example.com
+Ubicación: Madrid
+Área: Backend
+Grado: B2
+Skills: React, Node.js
+
+Nombre: Lisa Paez
+Correo Electrónico: lisa.paez@example.com
+Ubicación: No especificado
+Área: No especificado
+Grado: A1
+Skills: Vue.js
+
+
+
+Recuerda:  
 Siempre valida tus sugerencias usando las tools antes de responder y explica tu razonamiento si es relevante para la decisión.`
 
     /*  const systemMessage = `Eres TalentMatch AI, un agente inteligente especializado en staffing ágil para entornos corporativos. Estás diseñado para asistir a Project Managers, Recursos Humanos y otros roles clave en la identificación, recomendación y planificación de talento técnico.
@@ -173,16 +169,20 @@ Utiliza autoreflexión y herramientas de razonamiento cuando lo consideres neces
           .create({
             collection: 'conversations',
             data: {
-              title: generateTitle(transformedMessage[1].content),
+              title: 'test',
               messages: transformedMessage.map((msg) => ({
                 ...msg,
+                content:
+                  typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content),
                 timestamp: (msg as any).timestamp || new Date().toISOString(),
               })),
             },
           })
           .catch((error) => {
             console.error('Error en startConversation:', error)
-            throw new APIError(error.data.errors, 400, null, true)
+            const apiError =
+              error?.data?.errors ?? error?.message ?? 'Error desconocido al crear la conversación'
+            throw new APIError(apiError, 400, null, true)
           })
 
         const finalResponse = JSON.stringify({
@@ -250,7 +250,6 @@ export const chatConversation = async (req: PayloadRequest) => {
         const transformedMessage = messages
           .filter((message) => message.lc_kwargs.content)
           .map(baseMessageToRoleContent)
-        console.log(transformedMessage.slice(-1), ' transformedMessage')
         const currentMessages = conversation.messages || []
         // Verifica si el último mensaje del usuario ya está en el historial
         const lastUserMsg =
