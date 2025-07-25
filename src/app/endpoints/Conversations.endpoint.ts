@@ -20,13 +20,14 @@ function baseMessageToRoleContent(message: BaseMessage): {
   role: 'user' | 'system' | 'assistant' | 'tool'
   content: string
 } {
-  let role: 'user' | 'system' | 'assistant' | 'tool' | 'complete'
-
-  if (message instanceof SystemMessage) role = 'system'
-  else if (message instanceof HumanMessage) role = 'user'
-  else if (message instanceof AIMessage) role = 'assistant'
-  else if (message instanceof ToolMessage) role = 'tool'
-  else role = 'user'
+  const types = {
+    human: 'user',
+    system: 'system',
+    ai: 'assistant',
+    tool: 'tool',
+  } as const
+  console.log(message.getType(), 'message.getType()')
+  const role = types[message.getType() as keyof typeof types]
 
   return {
     role,
@@ -154,7 +155,6 @@ Tu comportamiento está guiado por los siguientes principios y funciones:
 
 Utiliza autoreflexión y herramientas de razonamiento cuando lo consideres necesario para validar tus sugerencias antes de responder.
 ` */
-    await memory.addMessage(systemMessage, 'system')
     await memory.addMessage(message, 'user')
 
     // Verificar que la memoria tenga el contexto necesario
@@ -181,12 +181,13 @@ Utiliza autoreflexión y herramientas de razonamiento cuando lo consideres neces
             },
           })
           .catch((error) => {
+            console.error('Error en startConversation:', error)
             throw new APIError(error.data.errors, 400, null, true)
           })
 
         const finalResponse = JSON.stringify({
           type: 'conversation_created',
-          conversationId: conversation?.id,
+          data: conversation?.id,
         })
         return finalResponse
       },

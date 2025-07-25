@@ -9,7 +9,6 @@ import { TextEncoder } from 'util'
 
 const getType = (message: BaseMessage) => {
   let role: 'user' | 'system' | 'assistant' | 'tool' | 'complete' | 'done'
-  console.log(message, ' message')
   if (message instanceof SystemMessage) role = 'system'
   else if ((message as any).tool_call_id) role = 'tool'
   else if (message instanceof HumanMessage) role = 'user'

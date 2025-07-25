@@ -19,12 +19,12 @@ export default async function HomePage() {
     <div className="home">
       <div className="content">
         <picture>
-          <source srcSet="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-favicon.svg" />
+          <source srcSet="https://www.capgemini.com/es-es/wp-content/themes/capgemini2020/assets/images/logo.svg" />
           <Image
             alt="Payload Logo"
-            height={65}
-            src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-favicon.svg"
-            width={65}
+            height={300}
+            src="https://www.capgemini.com/es-es/wp-content/themes/capgemini2020/assets/images/logo.svg"
+            width={300}
           />
         </picture>
         {!user && <h1>Welcome to your new project.</h1>}
